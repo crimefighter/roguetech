@@ -29,11 +29,15 @@ class Battlefield::Actor
     end
   end
 
-  include Battlefield::Behavior::Playable
-
   def initialize options
     @tile = options[:tile]
     @battlefield = options[:battlefield]
+
+    if behavior = options[:behavior]
+      extend behavior
+    end
+
+    puts options.inspect
 
     @actions = []
 

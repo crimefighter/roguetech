@@ -1,6 +1,20 @@
 module Battlefield
   module Behavior
     module Playable
+      def on_start_turn
+        kb_handler = KeyboardHandler.new
+        kb_handler.on(:up, Gosu::KbUp) { @actions << step(:up) }
+        kb_handler.on(:up, Gosu::KbDown) { @actions << step(:down) }
+        kb_handler.on(:up, Gosu::KbLeft) { @actions << step(:left) }
+        kb_handler.on(:up, Gosu::KbRight) { @actions << step(:right) }
+
+        Keyboard.set_handler :playable_actor, kb_handler
+      end
+
+      def on_end_turn
+        Keyboard.remove_handler :playable_actor
+      end
+
       def get_target_coordinates direction
         case direction
         when :up then [@tile.h, @tile.v-1]
@@ -20,20 +34,6 @@ module Battlefield
             actor: self
           })
         end
-      end
-
-      def on_start_turn
-        kb_handler = KeyboardHandler.new
-        kb_handler.on(:up, Gosu::KbUp) { @actions << step(:up) }
-        kb_handler.on(:up, Gosu::KbDown) { @actions << step(:down) }
-        kb_handler.on(:up, Gosu::KbLeft) { @actions << step(:left) }
-        kb_handler.on(:up, Gosu::KbRight) { @actions << step(:right) }
-
-        Keyboard.set_handler :playable_actor, kb_handler
-      end
-
-      def on_end_turn
-        Keyboard.remove_handler :playable_actor
       end
     end
   end
