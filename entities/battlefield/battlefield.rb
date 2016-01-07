@@ -35,8 +35,15 @@ class Battlefield::Battlefield
   end
 
   def add_actor actor
+    return unless actor.may_deploy?
+    actor.deploy
     @actors << actor
     actor.battlefield = self
+  end
+
+  def remove_actor actor
+    actor.remove_tile
+    @actors.delete actor
   end
 
   def get_tile h, v

@@ -15,7 +15,7 @@ class Keyboard
     end
 
     def handle event, btn_code
-      (@@handlers.values || []).each do |handler|
+      (@@handlers.values || []).compact.each do |handler|
         handler.handle event, btn_code
       end
     end

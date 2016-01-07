@@ -16,6 +16,10 @@ module Battlefield
         raise ArgumentError.new("Invalid arguments for Battlefield::Action: #{options.inspect}") unless valid?
       end
 
+      def available_action_types
+        @@available_action_types
+      end
+
       def valid?
         base = !@h.nil? && !@v.nil? && !@battlefield.nil? && !@actor.nil?
         base && @battlefield.valid_coordinates?(@h, @v)

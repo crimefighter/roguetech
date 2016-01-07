@@ -5,11 +5,15 @@ class GameWindow < Gosu::Window
     @battlefield = Battlefield::Battlefield.new(width: 20, height: 20)
     @battlefield.add_actor Battlefield::Actor.new({
       tile: @battlefield.tiles.first.first,
-      behavior: Battlefield::Behavior::Playable
+      behaviors: [Battlefield::Behavior::Playable]
     })
     @battlefield.add_actor Battlefield::Actor.new({
       tile: @battlefield.tiles[3][3],
-      behavior: Battlefield::Behavior::Playable
+      behaviors: [
+        Battlefield::Behavior::Idle,
+        Battlefield::Behavior::Damageable,
+        Battlefield::Behavior::Killable
+      ]
     })
     @viewport = Viewport.new(0, 0, 800, 600)
     @battlefield_renderer = Renderer::Battlefield.new({
@@ -29,6 +33,7 @@ class GameWindow < Gosu::Window
 
   def update
     @battlefield.tick
+    @battlefield_renderer.update
   end
 
   def draw

@@ -2,17 +2,28 @@ module Battlefield
 end
 
 class Battlefield::Actor
-  attr_reader :actions, :action_points
-  attr_accessor :battlefield, :tile
+  attr_reader :tile, :actions, :action_points, :hit_points
+  attr_accessor :battlefield, :available_action_types
 
   include AASM
 
   aasm do
     state :idle, initial: true
+    state :ready
     state :active
+    state :dead
+
+    event :deploy do
+      transitions from: :idle, to: :ready do
+        after do
+          reset_hit_points!
+          on_deploy if respond_to?(:on_deploy)
+        end
+      end
+    end
 
     event :start_turn do
-      transitions from: :idle, to: :active do
+      transitions from: :ready, to: :active do
         after do
           reset_action_points!
           on_start_turn if respond_to?(:on_start_turn)
@@ -21,9 +32,17 @@ class Battlefield::Actor
     end
 
     event :end_turn do
-      transitions from: :active, to: :idle do
+      transitions from: :active, to: :ready do
         after do
           on_end_turn if respond_to?(:on_start_turn)
+        end
+      end
+    end
+
+    event :become_dead do
+      transitions from: [:ready, :active], to: :dead do
+        after do
+          on_become_dead if respond_to?(:on_become_dead)
         end
       end
     end
@@ -33,7 +52,7 @@ class Battlefield::Actor
     @tile = options[:tile]
     @battlefield = options[:battlefield]
 
-    if behavior = options[:behavior]
+    (options[:behaviors] || []).each do |behavior|
       extend behavior
     end
 
@@ -42,12 +61,12 @@ class Battlefield::Actor
     @actions = []
 
     raise ArgumentError.new("Invalid arguments for Battlefield::Actor: #{options.inspect}") unless valid?
+
+    @tile.actor = self
   end
 
   def available_action_types
-    [
-      Battlefield::Action::Move
-    ]
+    @available_action_types ||= []
   end
 
   def can_perform? action
@@ -70,10 +89,14 @@ class Battlefield::Actor
   end
 
   def valid?
-    !@tile.nil?
+    !@tile.nil? && @tile.actor.nil?
   end
 
   def max_action_points
+    100
+  end
+
+  def max_hit_points
     100
   end
 
@@ -88,7 +111,22 @@ class Battlefield::Actor
     @action_points = max_action_points
   end
 
+  def reset_hit_points!
+    @hit_points = max_hit_points
+  end
+
   def shift_action
     @actions.shift
+  end
+
+  def set_tile new_tile
+    tile.actor = nil
+    @tile = new_tile
+    new_tile.actor = self
+  end
+
+  def remove_tile
+    tile.actor = nil
+    @tile = nil
   end
 end

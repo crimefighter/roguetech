@@ -17,7 +17,7 @@ class Renderer::BattlefieldActor
   end
 
   def valid?
-    !tile.nil? && !tile.h.nil? && !tile.v.nil?
+    !@actor.nil? && !tile.nil? && !tile.h.nil? && !tile.v.nil?
   end
 
   def width

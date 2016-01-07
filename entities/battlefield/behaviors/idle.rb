@@ -1,6 +1,6 @@
 module Battlefield
   module Behavior
-    class Base
+    module Idle
     end
   end
 end

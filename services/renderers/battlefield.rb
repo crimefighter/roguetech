@@ -37,6 +37,10 @@ class Renderer::Battlefield
     Keyboard.set_handler(:battlefield_scroll, @kb_handler)
   end
 
+  def update
+    @actors = @actors.reject {|actor| !actor.valid?}
+  end
+
   def draw
     offset = [@offset_x, @offset_y]
     @tiles.each do |tile_row|
