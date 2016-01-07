@@ -2,43 +2,75 @@ module Battlefield
 end
 
 class Battlefield::Turn
+  include AASM
+
+  aasm do
+    state :idle, initial: true
+    state :started
+    state :ended
+
+    event :start do
+      transitions from: :idle, to: :started, after: :on_start
+    end
+
+    event :finish do
+      transitions from: :started, to: :ended, after: :on_end
+    end
+  end
+
   def initialize options
     @battlefield = options[:battlefield]
+    @actor_queue = @battlefield.actors
+
     raise ArgumentError.new("Invalid arguments for Battlefield::Turn: #{options.inspect}") unless valid?
 
-    @actor_queue = @battlefield.actors
-    @actions = {}
+    @current_actor_index = 0
+    @performed_actions = {}
   end
 
   def valid?
-    !@battlefield.nil?
+    !@battlefield.nil? && !@actor_queue.nil? && !@actor_queue.empty?
   end
 
-  def start
-    @actor_queue.each do |actor|
+  def on_start
+    Logger.info "Turn started: #{self.to_s}"
+  end
+
+  def on_end
+    Logger.info "Turn ended: #{self.to_s}"
+  end
+
+  def tick
+    if current_actor.nil?
+      finish if may_finish?
+      return
+    end
+
+    current_actor.start_turn if current_actor.may_start_turn?
+
+    if action = current_actor.shift_action
+      action.perform!
+      performed_actions_of(current_actor) << action
+    end
+
+    if current_actor.available_actions.empty? && current_actor.may_end_turn?
+      current_actor.end_turn
+      activate_next_actor!
     end
   end
 
   private
 
-  def create_action options
-    action = Battlefield::Action.new options
-    if remaining_action_points(action.actor) < action.action_point_cost
-      raise 'Not enough AP'
-    end
-    action.perform!
-    actions_of(action.actor) << action
-  rescue => e
-    puts e.inspect
+  def current_actor
+    @actor_queue[@current_actor_index]
   end
 
-  def actions_of actor
-    @actions[actor.object_id] ||= []
+  def activate_next_actor!
+    Logger.info "#{current_actor.to_s} ends his turn" if current_actor
+    @current_actor_index += 1
   end
 
-  def remaining_action_points actor
-    actions_of(actor).map do |action|
-      action.action_point_cost.to_i
-    end.sum
+  def performed_actions_of actor
+    @performed_actions[actor.object_id] ||= []
   end
 end

@@ -1,9 +1,16 @@
+require 'rubygems'
 require 'gosu'
+require 'aasm'
+
+require './entities/battlefield/behaviors/playable.rb'
+
+require './entities/battlefield/actions/base.rb'
+require './entities/battlefield/actions/move.rb'
 
 require './entities/battlefield/battlefield.rb'
 require './entities/battlefield/tile.rb'
 require './entities/battlefield/actor.rb'
-require './entities/battlefield/playable.rb'
+require './entities/battlefield/turn.rb'
 
 require './services/viewport.rb'
 require './services/keyboard.rb'
@@ -17,6 +24,7 @@ require './services/renderers/battlefield_actor.rb'
 
 require './services/media_loader.rb'
 require './services/game_window.rb'
+require './services/logger.rb'
 
 window = GameWindow.new
 window.show

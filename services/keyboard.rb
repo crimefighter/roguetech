@@ -14,13 +14,9 @@ class Keyboard
       @@handlers = {}
     end
 
-    def handle_down
-      @@handlers.each(&:handle_down)
-    end
-
-    def handle_up btn_code
-      @@handlers.each do |handler|
-        handler.handle_up btn_code
+    def handle event, btn_code
+      (@@handlers.values || []).each do |handler|
+        handler.handle event, btn_code
       end
     end
   end

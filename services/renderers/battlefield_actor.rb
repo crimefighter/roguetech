@@ -10,11 +10,6 @@ class Renderer::BattlefieldActor
     raise ArgumentError.new("Invalid arguments for Renderer::BattlefieldActor: #{actor.inspect}") unless valid?
 
     @image = get_image
-
-    Keyboard.on(:up, Gosu::KbUp) { @actor.step :up }
-    Keyboard.on(:up, Gosu::KbLeft) { @actor.step :left }
-    Keyboard.on(:up, Gosu::KbDown) { @actor.step :down }
-    Keyboard.on(:up, Gosu::KbRight) { @actor.step :right }
   end
 
   def tile

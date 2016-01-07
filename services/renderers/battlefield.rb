@@ -17,24 +17,24 @@ class Renderer::Battlefield
       end
     end
 
-    @player = Renderer::BattlefieldPlayer.new(@battlefield.player)
-
     @actors = @battlefield.actors.map do |actor|
       Renderer::BattlefieldActor.new(actor)
     end
 
-    Keyboard.on(:down, Gosu::KbA) do
-      @offset_x += 5
-    end
-    Keyboard.on(:down, Gosu::KbD) do
-      @offset_x -= 5
-    end
-    Keyboard.on(:down, Gosu::KbW) do
-      @offset_y += 5
-    end
-    Keyboard.on(:down, Gosu::KbS) do
-      @offset_y -= 5
-    end
+    @kb_handler = KeyboardHandler.new
+      .on(:down, Gosu::KbA) do
+        @offset_x += 5
+      end
+      .on(:down, Gosu::KbD) do
+        @offset_x -= 5
+      end
+      .on(:down, Gosu::KbW) do
+        @offset_y += 5
+      end
+      .on(:down, Gosu::KbS) do
+        @offset_y -= 5
+      end
+    Keyboard.set_handler(:battlefield_scroll, @kb_handler)
   end
 
   def draw
