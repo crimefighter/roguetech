@@ -1,0 +1,19 @@
+GEM
+  remote: https://rubygems.org/
+  specs:
+    aasm (4.7.0)
+    algorithms (0.6.1)
+    gosu (0.10.4)
+    polaris (1.1.2)
+      algorithms
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  aasm
+  gosu
+  polaris
+
+BUNDLED WITH
+   1.11.2

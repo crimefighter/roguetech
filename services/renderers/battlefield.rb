@@ -13,41 +13,34 @@ class Renderer::Battlefield
 
     @tiles = @battlefield.tiles.map do |tile_row|
       tile_row.map do |tile|
-        Renderer::BattlefieldTile.new(tile)
+        Renderer::BattlefieldTile.new(tile, viewport: @viewport)
       end
     end
 
     @actors = @battlefield.actors.map do |actor|
       Renderer::BattlefieldActor.new(actor)
     end
-
-    @kb_handler = KeyboardHandler.new
-      .on(:down, Gosu::KbA) do
-        @offset_x += 5
-      end
-      .on(:down, Gosu::KbD) do
-        @offset_x -= 5
-      end
-      .on(:down, Gosu::KbW) do
-        @offset_y += 5
-      end
-      .on(:down, Gosu::KbS) do
-        @offset_y -= 5
-      end
-    Keyboard.set_handler(:battlefield_scroll, @kb_handler)
   end
 
   def update
     @actors = @actors.reject {|actor| !actor.valid?}
+
+    if Gosu::button_down?(Gosu::KbA) then @offset_x += 5; end
+    if Gosu::button_down?(Gosu::KbD) then @offset_x -= 5; end
+    if Gosu::button_down?(Gosu::KbW) then @offset_y += 5; end
+    if Gosu::button_down?(Gosu::KbS) then @offset_y -= 5; end
   end
 
   def draw
     offset = [@offset_x, @offset_y]
-    @tiles.each do |tile_row|
-      tile_row.each do |tile|
-        if tile.in_viewport? @viewport, offset
-          tile.draw offset
-        end
+    each_tile do |tile|
+      if tile_has_mouse?(tile)
+        tile.mouse_on if !tile.mouse
+      else
+        tile.mouse_off if tile.mouse
+      end
+      if tile.in_viewport? @viewport, offset
+        tile.draw offset
       end
     end
     @actors.each do |actor|
@@ -59,5 +52,20 @@ class Renderer::Battlefield
 
   def valid?
     !@viewport.nil? && !@battlefield.nil?
+  end
+
+  def each_tile &block
+    @tiles.each do |tile_row|
+      tile_row.each do |tile|
+        yield tile
+      end
+    end
+  end
+
+  def tile_has_mouse? tile
+    @viewport.mouse_x >= tile.x + offset_x &&
+    @viewport.mouse_x < tile.x1 + offset_x &&
+    @viewport.mouse_y >= tile.y + offset_y &&
+    @viewport.mouse_y < tile.y1 + offset_y
   end
 end

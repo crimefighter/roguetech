@@ -2,17 +2,23 @@ module Battlefield
 end
 
 class Battlefield::Battlefield
-  attr_reader :tiles, :actors, :width, :height, :current_turn
+  attr_reader :tiles, :actors, :width, :height, :current_turn, :grid_map, :pather
+  attr_accessor :mouse_tile
 
   def initialize options
     @width = options.fetch(:width, 0)
     @height = options.fetch(:height, 0)
 
     @actors = []
+    @tiles = []
+    @mouse_tile = nil
 
     raise ArgumentError.new("Invalid arguments for Battlefield::Battlefield: #{options.inspect}") unless valid?
 
     generate_tiles!
+
+    @grid_map = BattlefieldGridMap.new @width, @height, battlefield: self
+    @pather = Polaris.new @grid_map
   end
 
   def inspect
@@ -46,8 +52,14 @@ class Battlefield::Battlefield
     @actors.delete actor
   end
 
+  def current_actor
+    current_turn.current_actor
+  end
+
   def get_tile h, v
-    @tiles[h][v] rescue nil
+    if valid_coordinates? h, v
+      @tiles[h][v] rescue nil
+    end
   end
 
   def valid_coordinates? h, v
@@ -61,10 +73,18 @@ class Battlefield::Battlefield
   end
 
   def generate_tiles!
-    @tiles = (0..width).map do |h_pos|
-      (0..height).map do |v_pos|
-        Battlefield::Tile.new(terrain: :grass, v: v_pos, h: h_pos)
-      end
-    end
+    dungeon = CircularDungeon.new(@width, @height)
+    @tiles = dungeon.cells.map do |cell_row|
+      cell_row.map do |cell|
+        if valid_coordinates? cell.x, cell.y
+          Battlefield::Tile.new({
+            battlefield: self,
+            type: Battlefield::Tile.translate_type(cell.type),
+            h: cell.x,
+            v: cell.y
+          })
+        end
+      end.compact
+    end.compact
   end
 end

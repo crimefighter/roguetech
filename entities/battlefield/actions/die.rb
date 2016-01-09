@@ -15,9 +15,7 @@ module Battlefield
 
         @actor.become_dead
         Logger.info "#{@actor.to_s} has died due to #{@cause}"
-        puts @battlefield.actors.inspect
         @battlefield.remove_actor @actor
-        puts @battlefield.actors.inspect
       end
 
       def get_tile

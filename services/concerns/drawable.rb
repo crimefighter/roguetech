@@ -12,16 +12,21 @@ module Drawable
   end
 
   def scale_x
-    get_image.width.to_f / width
+    width.to_f / get_image.width.to_f
   end
 
   def scale_y
-    get_image.height.to_f / height
+    height.to_f / get_image.height.to_f
   end
 
   def draw offset = nil
     offset_x, offset_y = offset || [0, 0]
-    get_image.draw x+offset_x, y+offset_y, (z_index || 1), scale_x, scale_y
+    if !get_image.nil?
+      get_image.draw x+offset_x, y+offset_y, (z_index || 1), scale_x, scale_y
+    end
+    if respond_to?(:draw_hook)
+      draw_hook offset
+    end
   end
 
   def get_image

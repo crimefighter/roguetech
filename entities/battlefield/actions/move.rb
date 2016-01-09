@@ -3,7 +3,7 @@ module Battlefield
     class Move < Base
       def valid?
         base = super && (@actor.tile.h - @h).abs <= 1 && (@actor.tile.v - @v).abs <= 1
-        base && get_tile.actor.nil?
+        base && !get_tile.blocked? && get_tile.actor.nil?
       end
 
       def perform!

@@ -3,7 +3,7 @@ end
 
 class Battlefield::Actor
   attr_reader :tile, :actions, :action_points, :hit_points
-  attr_accessor :battlefield, :available_action_types
+  attr_accessor :battlefield, :behavior_action_types
 
   include AASM
 
@@ -49,24 +49,33 @@ class Battlefield::Actor
   end
 
   def initialize options
-    @tile = options[:tile]
     @battlefield = options[:battlefield]
-
-    (options[:behaviors] || []).each do |behavior|
-      extend behavior
-    end
-
-    puts options.inspect
+    set_tile options[:tile]
 
     @actions = []
+    @behaviors = []
+    @behavior_action_types = {}
 
     raise ArgumentError.new("Invalid arguments for Battlefield::Actor: #{options.inspect}") unless valid?
 
-    @tile.actor = self
+    (options[:behaviors] || []).each do |behavior|
+      add_behavior behavior
+    end
+  end
+
+  def add_behavior behavior
+    return if !behavior || @behaviors.include?(behavior)
+    @behaviors << behavior
+    self.extend behavior
+  end
+
+  def remove_behavior behavior
+    @behaviors.delete behavior
+    behavior.detach(self) if behavior.respond_to?(:detach)
   end
 
   def available_action_types
-    @available_action_types ||= []
+    behavior_action_types.values.flatten.compact.uniq
   end
 
   def can_perform? action
@@ -89,7 +98,7 @@ class Battlefield::Actor
   end
 
   def valid?
-    !@tile.nil? && @tile.actor.nil?
+    !@tile.nil?
   end
 
   def max_action_points
@@ -120,12 +129,17 @@ class Battlefield::Actor
   end
 
   def set_tile new_tile
-    tile.actor = nil
+    return unless new_tile
+    raise "Tile is occupied" unless new_tile.actor.nil?
+
+    remove_tile if @tile
     @tile = new_tile
     new_tile.actor = self
+    # @battlefield.grid_map.place BattlefieldGridLocation.new(new_tile.h, new_tile.v), self.object_id
   end
 
   def remove_tile
+    # @battlefield.grid_map.clear BattlefieldGridLocation.new(tile.h, tile.v)
     tile.actor = nil
     @tile = nil
   end

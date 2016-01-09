@@ -1,6 +1,6 @@
 require 'securerandom'
 
-class KeyboardHandler
+class UserInputHandler
   attr_accessor :queue
 
   def initialize

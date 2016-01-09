@@ -2,29 +2,46 @@ module Battlefield
   module Behavior
     module Playable
       def self.extended(base)
-        base.available_action_types = base.available_action_types | [
+        base.behavior_action_types[:playable] = [
           ::Battlefield::Action::Move,
           ::Battlefield::Action::Attack
         ]
-        puts base.inspect
+      end
+
+      def self.detach base
+        base.available_action_types[:playable] = nil
+      end
+
+      def shift_action
+        action = super
+        if action.nil? && @path_stack && !@path_stack.empty?
+          waypoint = @path_stack.shift.location
+          action = move(waypoint.x, waypoint.y)
+        end
+        action
       end
 
       def on_start_turn
-        kb_handler = KeyboardHandler.new
-        kb_handler.on(:up, Gosu::KbUp) { @actions << step(:up) }
-        kb_handler.on(:up, Gosu::KbDown) { @actions << step(:down) }
-        kb_handler.on(:up, Gosu::KbLeft) { @actions << step(:left) }
-        kb_handler.on(:up, Gosu::KbRight) { @actions << step(:right) }
-        kb_handler.on(:up, Gosu::Kb1) { @actions << step(:down_left) }
-        kb_handler.on(:up, Gosu::Kb3) { @actions << step(:down_right) }
-        kb_handler.on(:up, Gosu::Kb7) { @actions << step(:up_left) }
-        kb_handler.on(:up, Gosu::Kb9) { @actions << step(:up_right) }
+        input_handler = UserInputHandler.new
+          .on(:up, Gosu::KbUp) { @actions << step(:up) }
+          .on(:up, Gosu::KbDown) { @actions << step(:down) }
+          .on(:up, Gosu::KbLeft) { @actions << step(:left) }
+          .on(:up, Gosu::KbRight) { @actions << step(:right) }
+          .on(:up, Gosu::Kb1) { @actions << step(:down_left) }
+          .on(:up, Gosu::Kb3) { @actions << step(:down_right) }
+          .on(:up, Gosu::Kb7) { @actions << step(:up_left) }
+          .on(:up, Gosu::Kb9) { @actions << step(:up_right) }
+          .on(:up, Gosu::MsLeft) do
+            if @battlefield.respond_to?(:mouse_tile) && @battlefield.mouse_tile
+              @path_stack = path_to(@battlefield.mouse_tile)
+            end
+          end
 
-        Keyboard.set_handler :playable_actor, kb_handler
+        UserInput.set_handler :playable_actor, input_handler
       end
 
       def on_end_turn
-        Keyboard.remove_handler :playable_actor
+        UserInput.remove_handler :playable_actor
       end
 
       def get_target_coordinates direction
@@ -61,6 +78,8 @@ module Battlefield
             actor: self
           })
         end
+      rescue => e
+        Logger.info "Can't walk there!"
       end
 
       def attack h, v
@@ -72,8 +91,18 @@ module Battlefield
             actor: self
           })
         end
+      rescue => e
       end
 
+      def path_to target_tile
+        return if @tile.x == target_tile.x && @tile.y == target_tile.y
+        return if !@battlefield.pather
+
+        from = BattlefieldGridLocation.new(@tile.x, @tile.y)
+        to = BattlefieldGridLocation.new(target_tile.x, target_tile.y)
+
+        @battlefield.pather.guide(from, to)
+      end
     end
   end
 end

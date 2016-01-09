@@ -1,4 +1,4 @@
-class Keyboard
+class UserInput
   class << self
     @@handlers = {}
 

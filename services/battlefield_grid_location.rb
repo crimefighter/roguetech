@@ -1,0 +1,2 @@
+class BattlefieldGridLocation < TwoDGridLocation
+end

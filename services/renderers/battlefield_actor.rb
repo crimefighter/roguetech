@@ -21,11 +21,11 @@ class Renderer::BattlefieldActor
   end
 
   def width
-    101
+    50
   end
 
   def height
-    171
+    85
   end
 
   def z_index
@@ -37,7 +37,7 @@ class Renderer::BattlefieldActor
   end
 
   def y
-    tile.v * Renderer::BattlefieldTile::HEIGHT - 50
+    tile.v * Renderer::BattlefieldTile::HEIGHT - 25
   end
 
   private

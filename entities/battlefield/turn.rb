@@ -59,11 +59,11 @@ class Battlefield::Turn
     end
   end
 
-  private
-
   def current_actor
     @actor_queue[@current_actor_index]
   end
+
+  private
 
   def activate_next_actor!
     Logger.info "#{current_actor.to_s} ends his turn" if current_actor
