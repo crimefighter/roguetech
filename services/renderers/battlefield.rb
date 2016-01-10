@@ -23,7 +23,12 @@ class Renderer::Battlefield
   end
 
   def update
-    @actors = @actors.reject {|actor| !actor.valid?}
+    @actors.reject! do |actor|
+      !actor.valid?
+    end
+    @actors.each do |actor|
+      actor.visible = actor.visible_on_battlefield?
+    end
 
     if Gosu::button_down?(Gosu::KbA) then @offset_x += 5; end
     if Gosu::button_down?(Gosu::KbD) then @offset_x -= 5; end
@@ -44,8 +49,10 @@ class Renderer::Battlefield
       end
     end
     @actors.each do |actor|
-      if actor.in_viewport? @viewport, offset
+      if actor.visible && actor.in_viewport?(@viewport, offset)
         actor.draw offset
+      else
+        Gosu.draw_rect(actor.x+@offset_x, actor.y+@offset_y, actor.width, actor.height, Gosu::Color.new(50, 0, 0, 0), actor.z_index+1)
       end
     end
   end

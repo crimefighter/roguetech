@@ -3,6 +3,7 @@ GEM
   specs:
     aasm (4.7.0)
     algorithms (0.6.1)
+    bresenham (0.0.2)
     gosu (0.10.4)
     polaris (1.1.2)
       algorithms
@@ -12,6 +13,7 @@ PLATFORMS
 
 DEPENDENCIES
   aasm
+  bresenham
   gosu
   polaris
 

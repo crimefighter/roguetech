@@ -8,7 +8,7 @@ module Battlefield
           battlefield: @battlefield
         }).perform!
       rescue => e
-        Logger.info "#{self}.to_s could not die! #{e.inspect}"
+        Logger.error "#{self}.to_s could not die! #{e.inspect}"
       end
 
       def should_die?

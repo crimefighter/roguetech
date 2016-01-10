@@ -2,7 +2,7 @@ module Battlefield
 end
 
 class Battlefield::Actor
-  attr_reader :tile, :actions, :action_points, :hit_points
+  attr_reader :tile, :actions, :behaviors, :action_points, :hit_points
   attr_accessor :battlefield, :behavior_action_types
 
   include AASM
@@ -110,7 +110,7 @@ class Battlefield::Actor
   end
 
   def spend_action_points amount
-    if amount <= @action_points
+    if amount <= (@action_points ||= 0)
       @action_points -= amount
     end
     @action_points
@@ -118,6 +118,11 @@ class Battlefield::Actor
 
   def reset_action_points!
     @action_points = max_action_points
+  end
+
+  def spend_hit_points amount
+    @hit_points ||= 0
+    @hit_points -= amount.to_i
   end
 
   def reset_hit_points!

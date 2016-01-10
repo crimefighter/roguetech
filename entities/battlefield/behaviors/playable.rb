@@ -12,6 +12,10 @@ module Battlefield
         base.available_action_types[:playable] = nil
       end
 
+      def playable?
+        true
+      end
+
       def shift_action
         action = super
         if action.nil? && @path_stack && !@path_stack.empty?

@@ -12,16 +12,8 @@ module Battlefield
 
         Logger.info "#{@actor.to_s} attacks #{target_actor.to_s} spending #{action_points_spent} AP and has #{@actor.action_points}/#{@actor.max_action_points} AP left"
 
-        if target_actor.respond_to? :take_damage
-          target_actor.take_damage damage
-
-          Logger.info "#{target_actor.to_s} loses #{damage} HP and has #{target_actor.hit_points}/#{target_actor.max_hit_points} HP left"
-
-          if target_actor.respond_to?(:should_die?)
-            target_actor.die!(self) if target_actor.should_die?
-          else
-            Logger.info "#{target_actor.to_s} cannot die"
-          end
+        if target_actor.respond_to? :take_damage!
+          target_actor.take_damage! self
         else
           Logger.info "#{target_actor.to_s} cannot be damaged"
         end

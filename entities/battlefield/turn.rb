@@ -46,6 +46,11 @@ class Battlefield::Turn
       return
     end
 
+    if current_actor.respond_to?(:passive?) && current_actor.passive?
+      activate_next_actor!
+      return
+    end
+
     current_actor.start_turn if current_actor.may_start_turn?
 
     if action = current_actor.shift_action

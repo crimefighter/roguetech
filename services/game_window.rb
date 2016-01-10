@@ -6,16 +6,21 @@ class GameWindow < Gosu::Window
     @battlefield.add_actor Battlefield::Actor.new({
       battlefield: @battlefield,
       tile: @battlefield.tiles.flatten.find {|tile| !tile.blocked? && tile.actor.nil?},
-      behaviors: [Battlefield::Behavior::Playable]
+      behaviors: [
+        Battlefield::Behavior::Playable,
+        Battlefield::Behavior::Sighted,
+        Battlefield::Behavior::Visible
+      ]
     })
     2.times do
       @battlefield.add_actor Battlefield::Actor.new({
         battlefield: @battlefield,
         tile: @battlefield.tiles.flatten.shuffle.find {|tile| !tile.blocked? && tile.actor.nil?},
         behaviors: [
-          Battlefield::Behavior::Idle,
+          Battlefield::Behavior::Passive,
           Battlefield::Behavior::Damageable,
-          Battlefield::Behavior::Killable
+          Battlefield::Behavior::Killable,
+          Battlefield::Behavior::Visible
         ]
       })
     end

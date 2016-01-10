@@ -11,6 +11,8 @@ module Battlefield
 
         @actor.set_tile get_tile
         Logger.info "#{@actor.to_s} moved to #{@h}, #{@v} for #{action_points_spent} and has #{@actor.action_points}/#{@actor.max_action_points} AP left"
+
+        @actor.reset_visibility_cache! if @actor.respond_to?(:reset_visibility_cache!)
       end
 
       def get_tile

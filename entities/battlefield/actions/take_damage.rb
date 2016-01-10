@@ -1,6 +1,6 @@
 module Battlefield
   module Action
-    class Die < Base
+    class TakeDamage < Base
       def self.action_point_cost_for actor
         0
       end
@@ -11,15 +11,20 @@ module Battlefield
       end
 
       def valid?
-        !@battlefield.nil? && !@actor.nil? && !@cause.nil? && @actor.may_become_dead?
+        !@battlefield.nil? && !@actor.nil? && !@cause.nil?
       end
 
       def perform!
         super
+        amount = 50
 
-        @actor.become_dead
-        Logger.info "#{@actor.to_s} has died due to #{@cause}"
-        @battlefield.remove_actor @actor
+        @actor.spend_hit_points amount
+
+        Logger.info "#{@actor.to_s} takes #{amount} damage due to #{@cause}"
+
+        if @actor.respond_to?(:should_die?) && @actor.should_die?
+          @actor.die!(self)
+        end
       end
 
       def get_tile

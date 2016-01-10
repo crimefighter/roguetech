@@ -1,3 +1,5 @@
+require 'ostruct'
+
 class BattlefieldGridMap < TwoDGridMap
   def initialize w, h, options = nil
     super w, h
