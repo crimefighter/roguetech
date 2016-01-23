@@ -16,7 +16,7 @@ module Battlefield
 
       def perform!
         super
-        amount = 50
+        amount = @cause.damage
 
         @actor.spend_hit_points amount
 

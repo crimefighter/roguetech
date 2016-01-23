@@ -3,13 +3,29 @@ end
 
 class Battlefield::Battlefield
   attr_reader :tiles, :actors, :width, :height, :current_turn, :grid_map, :pather
-  attr_accessor :mouse_tile
+  attr_accessor :mouse_tile, :actions, :primary_actor
+
+  include AASM
+
+  aasm do
+    state :peace, initial: true
+    state :combat
+
+    event :start_combat do
+      transitions from: :peace, to: :combat, after: :on_start_combat
+    end
+
+    event :end_combat do
+      transitions from: :combat, to: :peace, after: :on_end_combat
+    end
+  end
 
   def initialize options
     @width = options.fetch(:width, 0)
     @height = options.fetch(:height, 0)
 
     @actors = []
+    @actions = []
     @tiles = []
     @mouse_tile = nil
 
@@ -52,6 +68,12 @@ class Battlefield::Battlefield
     @actors.delete actor
   end
 
+  def on_start_combat
+  end
+
+  def on_end_combat
+  end
+
   def current_actor
     current_turn.current_actor
   end
@@ -73,7 +95,7 @@ class Battlefield::Battlefield
   end
 
   def generate_tiles!
-    dungeon = CircularDungeon.new(@width, @height)
+    dungeon = Dungeon.new(@width, @height)
     @tiles = dungeon.cells.map do |cell_row|
       cell_row.map do |cell|
         if valid_coordinates? cell.x, cell.y

@@ -1,31 +1,24 @@
 module Battlefield
   module Behavior
     module Playable
-      def self.extended(base)
-        base.behavior_action_types[:playable] = [
-          ::Battlefield::Action::Move,
-          ::Battlefield::Action::Attack
-        ]
-      end
-
-      def self.detach base
-        base.available_action_types[:playable] = nil
-      end
-
       def playable?
         true
       end
 
-      def shift_action
-        action = super
-        if action.nil? && @path_stack && !@path_stack.empty?
-          waypoint = @path_stack.shift.location
-          action = move(waypoint.x, waypoint.y)
-        end
-        action
+      def to_s
+        super + " (PLAYER)"
       end
 
       def on_start_turn
+        clear_path_stack!
+        wait_for_input
+      end
+
+      def on_end_turn
+        UserInput.remove_handler :playable_actor
+      end
+
+      def wait_for_input
         input_handler = UserInputHandler.new
           .on(:up, Gosu::KbUp) { @actions << step(:up) }
           .on(:up, Gosu::KbDown) { @actions << step(:down) }
@@ -36,16 +29,28 @@ module Battlefield
           .on(:up, Gosu::Kb7) { @actions << step(:up_left) }
           .on(:up, Gosu::Kb9) { @actions << step(:up_right) }
           .on(:up, Gosu::MsLeft) do
-            if @battlefield.respond_to?(:mouse_tile) && @battlefield.mouse_tile
-              @path_stack = path_to(@battlefield.mouse_tile)
+            if @battlefield.respond_to?(:mouse_tile) && mouse_tile = @battlefield.mouse_tile
+              if (target_actor = mouse_tile.actor) && respond_to?(:can_attack?) && can_attack?(target_actor)
+                @actions << attack(mouse_tile.h, mouse_tile.v)
+              else
+                @path_stack = path_to(mouse_tile)
+              end
             end
           end
 
         UserInput.set_handler :playable_actor, input_handler
       end
 
-      def on_end_turn
-        UserInput.remove_handler :playable_actor
+      def step direction
+        target_h, target_v = get_target_coordinates(direction)
+        target_tile = @battlefield.get_tile(target_h, target_v)
+        if target_tile.actor.nil? && respond_to?(:move)
+          move target_h, target_v
+        elsif respond_to?(:attack)
+          attack target_h, target_v
+        end
+      rescue => e
+        Logger.info "Action was invalid and could not be performed: #{e.inspect}"
       end
 
       def get_target_coordinates direction
@@ -59,53 +64,6 @@ module Battlefield
         when :down_left then [@tile.h-1, @tile.v+1]
         when :down_right then [@tile.h+1, @tile.v+1]
         end
-      end
-
-      def step direction
-        target_h, target_v = get_target_coordinates(direction)
-        target_tile = @battlefield.get_tile(target_h, target_v)
-        if target_tile.actor.nil?
-          move target_h, target_v
-        else
-          attack target_h, target_v
-        end
-      rescue => e
-        Logger.info "Action was invalid and could not be performed: #{e.inspect}"
-      end
-
-      def move h, v
-        if can_perform?(::Battlefield::Action::Move)
-          ::Battlefield::Action::Move.new({
-            h: h,
-            v: v,
-            battlefield: @battlefield,
-            actor: self
-          })
-        end
-      rescue => e
-        Logger.info "Can't walk there!"
-      end
-
-      def attack h, v
-        if can_perform?(::Battlefield::Action::Attack)
-          ::Battlefield::Action::Attack.new({
-            h: h,
-            v: v,
-            battlefield: @battlefield,
-            actor: self
-          })
-        end
-      rescue => e
-      end
-
-      def path_to target_tile
-        return if @tile.x == target_tile.x && @tile.y == target_tile.y
-        return if !@battlefield.pather
-
-        from = BattlefieldGridLocation.new(@tile.x, @tile.y)
-        to = BattlefieldGridLocation.new(target_tile.x, target_tile.y)
-
-        @battlefield.pather.guide(from, to)
       end
     end
   end

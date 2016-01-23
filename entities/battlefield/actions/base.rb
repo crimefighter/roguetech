@@ -2,10 +2,10 @@ module Battlefield
   module Action
     class Base
       def self.action_point_cost_for actor
-        50
+        25
       end
 
-      attr_reader :action_points_spent
+      attr_reader :action_points_spent, :h, :v
 
       def initialize options
         @h = options[:h]
@@ -32,6 +32,15 @@ module Battlefield
       def perform!
         @action_points_spent = action_point_cost
         @actor.spend_action_points(@action_points_spent)
+      end
+
+      def get_tile
+        @tile ||= @battlefield.get_tile @h, @v
+      end
+
+      def target_actor
+        return if get_tile.nil?
+        @target_actor ||= get_tile.actor
       end
     end
   end

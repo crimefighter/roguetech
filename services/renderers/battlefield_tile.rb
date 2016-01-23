@@ -35,6 +35,14 @@ class Renderer::BattlefieldTile
     1
   end
 
+  def h
+    @tile.h
+  end
+
+  def v
+    @tile.v
+  end
+
   def x
     @tile.h * width
   end
@@ -62,10 +70,14 @@ class Renderer::BattlefieldTile
     @mouse = false
   end
 
-  def draw_hook offset = nil
+  def draw_hook offset = nil, options = nil
     offset_x, offset_y = offset || [0, 0]
+    options ||= {}
+    if waypoint = options[:waypoint]
+      Gosu.draw_rect(x+offset_x, y+offset_y, width, height, Gosu::Color.new(100, 255, 255, 255), z_index+1)
+    end
     if mouse
-      Gosu.draw_rect(x+offset_x, y+offset_y, width, height, Gosu::Color.new(50, 255, 255, 255), z_index+1)
+      Gosu.draw_rect(x+offset_x, y+offset_y, width, height, Gosu::Color.new(50, 255, 255, 255), z_index+2)
     end
   end
 

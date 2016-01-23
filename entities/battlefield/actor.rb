@@ -2,7 +2,7 @@ module Battlefield
 end
 
 class Battlefield::Actor
-  attr_reader :tile, :actions, :behaviors, :action_points, :hit_points
+  attr_reader :tile, :path_stack, :actions, :behaviors, :action_points, :hit_points
   attr_accessor :battlefield, :behavior_action_types
 
   include AASM
@@ -11,6 +11,7 @@ class Battlefield::Actor
     state :idle, initial: true
     state :ready
     state :active
+    state :waiting
     state :dead
 
     event :deploy do
@@ -31,16 +32,20 @@ class Battlefield::Actor
       end
     end
 
+    event :wait do
+      transitions from: :active, to: :waiting
+    end
+
     event :end_turn do
-      transitions from: :active, to: :ready do
+      transitions from: [:active, :waiting], to: :ready do
         after do
-          on_end_turn if respond_to?(:on_start_turn)
+          on_end_turn if respond_to?(:on_end_turn)
         end
       end
     end
 
     event :become_dead do
-      transitions from: [:ready, :active], to: :dead do
+      transitions from: [:ready, :active, :waiting], to: :dead do
         after do
           on_become_dead if respond_to?(:on_become_dead)
         end
@@ -53,6 +58,7 @@ class Battlefield::Actor
     set_tile options[:tile]
 
     @actions = []
+    @path_stack = []
     @behaviors = []
     @behavior_action_types = {}
 
@@ -67,6 +73,7 @@ class Battlefield::Actor
     return if !behavior || @behaviors.include?(behavior)
     @behaviors << behavior
     self.extend behavior
+    behavior.attach(self) if behavior.respond_to?(:attach)
   end
 
   def remove_behavior behavior
@@ -133,18 +140,20 @@ class Battlefield::Actor
     @actions.shift
   end
 
+  def clear_path_stack!
+    @path_stack = nil
+  end
+
   def set_tile new_tile
     return unless new_tile
     raise "Tile is occupied" unless new_tile.actor.nil?
 
     remove_tile if @tile
     @tile = new_tile
-    new_tile.actor = self
-    # @battlefield.grid_map.place BattlefieldGridLocation.new(new_tile.h, new_tile.v), self.object_id
+    @tile.actor = self
   end
 
   def remove_tile
-    # @battlefield.grid_map.clear BattlefieldGridLocation.new(tile.h, tile.v)
     tile.actor = nil
     @tile = nil
   end

@@ -1,7 +1,7 @@
 module Battlefield
   module Behavior
     module Damageable
-      def self.extended(base)
+      def self.attach(base)
         base.behavior_action_types[:playable] = [
           ::Battlefield::Action::TakeDamage
         ]

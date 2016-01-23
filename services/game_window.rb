@@ -1,17 +1,38 @@
-class GameWindow < Gosu::Window
+class GameWindow < Chingu::Window
   def initialize
     super 1600, 900
     self.caption = "Roguetech"
     @battlefield = Battlefield::Battlefield.new(width: 30, height: 30)
-    @battlefield.add_actor Battlefield::Actor.new({
+    player = Battlefield::Actor.new({
       battlefield: @battlefield,
       tile: @battlefield.tiles.flatten.find {|tile| !tile.blocked? && tile.actor.nil?},
       behaviors: [
         Battlefield::Behavior::Playable,
+        Battlefield::Behavior::Movable,
+        Battlefield::Behavior::Attacker,
         Battlefield::Behavior::Sighted,
-        Battlefield::Behavior::Visible
+        Battlefield::Behavior::Visible,
+        # Battlefield::Behavior::Displaceable
       ]
     })
+    @battlefield.add_actor player
+
+    follower = Battlefield::Actor.new({
+      battlefield: @battlefield,
+      tile: @battlefield.tiles.flatten.find {|tile| !tile.blocked? && tile.actor.nil?},
+      behaviors: [
+        Battlefield::Behavior::Follower,
+        Battlefield::Behavior::Movable,
+        Battlefield::Behavior::Attacker,
+        Battlefield::Behavior::Sighted,
+        Battlefield::Behavior::Visible,
+        Battlefield::Behavior::Displaceable
+      ]
+    })
+
+    follower.follow_target = player
+    @battlefield.add_actor follower
+
     2.times do
       @battlefield.add_actor Battlefield::Actor.new({
         battlefield: @battlefield,

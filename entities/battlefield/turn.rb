@@ -53,12 +53,14 @@ class Battlefield::Turn
 
     current_actor.start_turn if current_actor.may_start_turn?
 
+    current_actor.decide_behavior if current_actor.respond_to?(:decide_behavior)
+
     if action = current_actor.shift_action
       action.perform!
       performed_actions_of(current_actor) << action
     end
 
-    if current_actor.available_actions.empty? && current_actor.may_end_turn?
+    if (current_actor.available_actions.empty? || current_actor.waiting?) && current_actor.may_end_turn?
       current_actor.end_turn
       activate_next_actor!
     end

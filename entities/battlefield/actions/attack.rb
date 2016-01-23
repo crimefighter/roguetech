@@ -1,9 +1,12 @@
 module Battlefield
   module Action
     class Attack < Base
+      def self.action_point_cost_for actor
+        50
+      end
+
       def valid?
-        base = super && (@actor.tile.h - @h).abs <= 1 && (@actor.tile.v - @v).abs <= 1
-        base && !target_actor.nil?
+        super && !target_actor.nil? && @actor.respond_to?(:attack_range) && @actor.respond_to?(:attack_damage) && target_in_range?
       end
 
       def perform!
@@ -19,12 +22,12 @@ module Battlefield
         end
       end
 
-      def get_tile
-        @tile ||= @battlefield.get_tile @h, @v
+      def target_in_range?
+        @actor.target_in_attack_range?(@h, @v)
       end
 
-      def target_actor
-        get_tile.actor unless get_tile.nil?
+      def damage
+        @actor.attack_damage
       end
     end
   end

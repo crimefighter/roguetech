@@ -19,13 +19,13 @@ module Drawable
     height.to_f / get_image.height.to_f
   end
 
-  def draw offset = nil
+  def draw offset = nil, options = nil
     offset_x, offset_y = offset || [0, 0]
     if !get_image.nil?
       get_image.draw x+offset_x, y+offset_y, (z_index || 1), scale_x, scale_y
     end
     if respond_to?(:draw_hook)
-      draw_hook offset
+      draw_hook offset, options
     end
   end
 

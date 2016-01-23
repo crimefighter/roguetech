@@ -9,7 +9,6 @@ class BattlefieldGridMap < TwoDGridMap
 
   def blocked? location, type = nil
     tile = @battlefield.get_tile location.x, location.y
-    return true if tile.nil? || tile.blocked?
-    !tile.actor.nil? && tile.actor != @battlefield.current_actor
+    return true if tile.nil? || tile.blocks_movement?
   end
 end

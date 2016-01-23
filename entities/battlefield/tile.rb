@@ -4,7 +4,7 @@ class Battlefield::Tile
   attr_accessor :actor, :mouse
 
   def self.translate_type cell_type
-    if cell_type < 3
+    if cell_type < 2
       :blocked
     else
       :floor
@@ -34,6 +34,16 @@ class Battlefield::Tile
 
   def blocked?
     @type == :blocked
+  end
+
+  def blocks_vision?
+    blocked?
+  end
+
+  def blocks_movement?
+    return false if !blocked? && @actor.nil?
+    !(@actor.respond_to?(:playable?) && @actor.playable?) &&
+    !(@actor.respond_to?(:displaceable?) && @actor.displaceable?)
   end
 
   private

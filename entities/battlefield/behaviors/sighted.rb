@@ -17,7 +17,7 @@ module Battlefield
       def line_of_sight? actor
         Bresenham::Line.coordinates(tile.x, tile.y, actor.tile.x, actor.tile.y).to_a.all? do |coords|
           tile = @battlefield.get_tile(*coords)
-          tile && !tile.blocked?
+          tile && !tile.blocks_vision?
         end
       rescue => e
         Logger.error "Could not calculate line of sight from #{self} to #{actor}!: #{e.inspect}"

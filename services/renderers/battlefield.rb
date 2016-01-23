@@ -20,6 +20,8 @@ class Renderer::Battlefield
     @actors = @battlefield.actors.map do |actor|
       Renderer::BattlefieldActor.new(actor)
     end
+
+    @actions = {}
   end
 
   def update
@@ -29,6 +31,14 @@ class Renderer::Battlefield
     @actors.each do |actor|
       actor.visible = actor.visible_on_battlefield?
     end
+
+    # if @battlefield.current_actor && @battlefield.current_actor.path_stack
+    #   @waypoints = {}
+    #   @battlefield.current_actor.path_stack.each do |waypoint|
+    #     @waypoints[waypoint.location.x] ||= {}
+    #     @waypoints[waypoint.location.x][waypoint.location.y] = true;
+    #   end
+    # end
 
     if Gosu::button_down?(Gosu::KbA) then @offset_x += 5; end
     if Gosu::button_down?(Gosu::KbD) then @offset_x -= 5; end
@@ -45,12 +55,12 @@ class Renderer::Battlefield
         tile.mouse_off if tile.mouse
       end
       if tile.in_viewport? @viewport, offset
-        tile.draw offset
+        tile.draw offset #, waypoint: tile_has_waypoint?(tile)
       end
     end
     @actors.each do |actor|
       if actor.visible && actor.in_viewport?(@viewport, offset)
-        actor.draw offset
+        actor.draw offset, current_actor: @battlefield.current_actor
       else
         Gosu.draw_rect(actor.x+@offset_x, actor.y+@offset_y, actor.width, actor.height, Gosu::Color.new(50, 0, 0, 0), actor.z_index+1)
       end
@@ -74,5 +84,9 @@ class Renderer::Battlefield
     @viewport.mouse_x < tile.x1 + offset_x &&
     @viewport.mouse_y >= tile.y + offset_y &&
     @viewport.mouse_y < tile.y1 + offset_y
+  end
+
+  def tile_has_waypoint? tile
+    @waypoints.fetch(tile.h, {})[tile.v]
   end
 end
