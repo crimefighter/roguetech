@@ -1,14 +1,14 @@
 module Battlefield
   module Behavior
     module Attacker
-      def self.attach(base)
-        base.behavior_action_types[:attacker] = [
+      def attach
+        behavior_action_types[:attacker] = [
           ::Battlefield::Action::Attack
         ]
       end
 
-      def self.detach base
-        base.available_action_types[:attacker] = nil
+      def detach
+        behavior_action_types[:attacker] = nil
       end
 
       def attack h, v

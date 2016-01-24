@@ -21,7 +21,7 @@ class GameWindow < Chingu::Window
       battlefield: @battlefield,
       tile: @battlefield.tiles.flatten.find {|tile| !tile.blocked? && tile.actor.nil?},
       behaviors: [
-        Battlefield::Behavior::Follower,
+        Battlefield::Behavior::Companion,
         Battlefield::Behavior::Movable,
         Battlefield::Behavior::Attacker,
         Battlefield::Behavior::Sighted,
@@ -30,7 +30,7 @@ class GameWindow < Chingu::Window
       ]
     })
 
-    follower.follow_target = player
+    follower.set_master player
     @battlefield.add_actor follower
 
     2.times do
@@ -41,7 +41,8 @@ class GameWindow < Chingu::Window
           Battlefield::Behavior::Passive,
           Battlefield::Behavior::Damageable,
           Battlefield::Behavior::Killable,
-          Battlefield::Behavior::Visible
+          Battlefield::Behavior::Visible,
+          Battlefield::Behavior::Enemy
         ]
       })
     end

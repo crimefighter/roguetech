@@ -25,6 +25,7 @@ require './entities/battlefield/behaviors/attacker.rb'
 require './entities/battlefield/behaviors/displaceable.rb'
 require './entities/battlefield/behaviors/companion.rb'
 require './entities/battlefield/behaviors/follower.rb'
+require './entities/battlefield/behaviors/enemy.rb'
 
 require './entities/battlefield/actions/base.rb'
 require './entities/battlefield/actions/move.rb'

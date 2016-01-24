@@ -1,35 +1,58 @@
 module Battlefield
   module Behavior
     module Companion
-      def self.attach base
-        base.class.send(:attr_accessor, :master)
-        base.class.send(:attr_accessor, :companion)
-        base.companion = true
-      end
 
-      def self.detach base
-        base.master = nil
-        base.companion = false
-      end
+        def set_master actor
+          @master = actor
+        end
 
-      def companion?
-        @companion
-      end
+        def master
+          @master
+        end
 
-      def decide_behavior
-        if battlefield.peace?
-          if respond_to?(:playable?) && playable? && !master.nil?
-            remove_behavior(::Battlefield::Behavior::Playable)
-            puts "remove playable"
-          end
-          if !(respond_to?(:follower?) && follower?) && !master.nil?
-            add_behavior(::Battlefield::Behavior::Follower)
-            follow_target = master
-            puts "add follower #{follow_target}"
-            puts available_action_types.inspect
+        def companion?
+          true
+        end
+
+        def start_turn
+          if enemies_present?
+            if has_behavior?(::Battlefield::Behavior::Follower)
+              remove_behavior(::Battlefield::Behavior::Follower)
+              puts "remove follower"
+            end
+            if !has_behavior?(::Battlefield::Behavior::Playable)
+              add_behavior(::Battlefield::Behavior::Playable)
+              behavior_event(:start_turn)
+              puts "add playable"
+            end
+          else
+            if has_behavior?(::Battlefield::Behavior::Playable)
+              remove_behavior(::Battlefield::Behavior::Playable)
+              puts "remove playable"
+            end
+            if !has_behavior?(::Battlefield::Behavior::Follower)
+              add_behavior(::Battlefield::Behavior::Follower)
+              set_follow_target master
+              behavior_event(:start_turn)
+              puts "add follower #{follow_target}"
+            end
           end
         end
-      end
+
+        def enemies_present?
+          actors_in_party.any? do |actor|
+            actor.visible_actors.any? do |visible_actor|
+              visible_actor.has_behavior?(::Battlefield::Behavior::Enemy)
+            end
+          end
+        end
+
+        def actors_in_party
+          @battlefield.actors.reject do |actor|
+            !actor.has_behavior?(::Battlefield::Behavior::Playable) &&
+            !actor.has_behavior?(::Battlefield::Behavior::Companion)
+          end
+        end
     end
   end
 end

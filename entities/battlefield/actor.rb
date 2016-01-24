@@ -27,7 +27,7 @@ class Battlefield::Actor
       transitions from: :ready, to: :active do
         after do
           reset_action_points!
-          on_start_turn if respond_to?(:on_start_turn)
+          behavior_event(:start_turn)
         end
       end
     end
@@ -39,7 +39,7 @@ class Battlefield::Actor
     event :end_turn do
       transitions from: [:active, :waiting], to: :ready do
         after do
-          on_end_turn if respond_to?(:on_end_turn)
+          behavior_event(:end_turn)
         end
       end
     end
@@ -47,7 +47,7 @@ class Battlefield::Actor
     event :become_dead do
       transitions from: [:ready, :active, :waiting], to: :dead do
         after do
-          on_become_dead if respond_to?(:on_become_dead)
+          behavior_event(:become_dead)
         end
       end
     end
@@ -69,16 +69,52 @@ class Battlefield::Actor
     end
   end
 
+  def method_missing symbol, *args
+    behavior = behavior_responding_to symbol
+    if !behavior.nil?
+      meth = behavior.instance_method(symbol).bind(self)
+      meth.call(*args)
+    else
+      super
+    end
+  end
+
+  def respond_to? symbol
+    super || !behavior_responding_to(symbol).nil?
+  end
+
+  def behavior_responding_to symbol
+    @behaviors.find do |behavior|
+      behavior.instance_methods.include?(symbol)
+    end
+  end
+
   def add_behavior behavior
     return if !behavior || @behaviors.include?(behavior)
     @behaviors << behavior
-    self.extend behavior
+    if behavior.instance_methods.include?(:attach)
+      behavior.instance_method(:attach).bind(self).call
+    end
     behavior.attach(self) if behavior.respond_to?(:attach)
   end
 
   def remove_behavior behavior
     @behaviors.delete behavior
-    behavior.detach(self) if behavior.respond_to?(:detach)
+    if behavior.instance_methods.include?(:detach)
+      behavior.instance_method(:detach).bind(self).call
+    end
+  end
+
+  def has_behavior? behavior
+    @behaviors.include?(behavior)
+  end
+
+  def behavior_event symbol
+    @behaviors.each do |behavior|
+      if behavior.instance_methods.include?(symbol)
+        behavior.instance_method(symbol).bind(self).call
+      end
+    end
   end
 
   def available_action_types

@@ -53,7 +53,7 @@ class Battlefield::Turn
 
     current_actor.start_turn if current_actor.may_start_turn?
 
-    current_actor.decide_behavior if current_actor.respond_to?(:decide_behavior)
+    current_actor.behavior_event(:decide_behavior)
 
     if action = current_actor.shift_action
       action.perform!

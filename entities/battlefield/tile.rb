@@ -46,6 +46,10 @@ class Battlefield::Tile
     !(@actor.respond_to?(:displaceable?) && @actor.displaceable?)
   end
 
+  def blocks_path?
+    blocked?
+  end
+
   private
 
   def valid?

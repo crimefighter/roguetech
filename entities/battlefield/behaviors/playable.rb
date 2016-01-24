@@ -5,16 +5,12 @@ module Battlefield
         true
       end
 
-      def to_s
-        super + " (PLAYER)"
-      end
-
-      def on_start_turn
+      def start_turn
         clear_path_stack!
         wait_for_input
       end
 
-      def on_end_turn
+      def end_turn
         UserInput.remove_handler :playable_actor
       end
 

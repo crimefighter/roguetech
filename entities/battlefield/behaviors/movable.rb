@@ -1,23 +1,21 @@
 module Battlefield
   module Behavior
     module Movable
-      def self.attach(base)
-        base.behavior_action_types[:movable] = [
+      def attach
+        behavior_action_types[:movable] = [
           ::Battlefield::Action::Move
         ]
       end
 
-      def self.detach base
-        base.available_action_types[:movable] = nil
+      def detach
+        behavior_action_types[:movable] = nil
       end
 
-      def shift_action
-        action = super
-        if action.nil? && @path_stack && !@path_stack.empty?
+      def decide_behavior
+        if !(@actions && !@actions.empty?) && (@path_stack && !@path_stack.empty?)
           waypoint = @path_stack.shift.location
-          action = move(waypoint.x, waypoint.y)
+          (@actions ||= []) << move(waypoint.x, waypoint.y)
         end
-        action
       end
 
       def move h, v
