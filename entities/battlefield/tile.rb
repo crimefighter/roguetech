@@ -42,8 +42,8 @@ class Battlefield::Tile
 
   def blocks_movement?
     return false if !blocked? && @actor.nil?
-    !(@actor.respond_to?(:playable?) && @actor.playable?) &&
-    !(@actor.respond_to?(:displaceable?) && @actor.displaceable?)
+    !(@actor.respond_to?(:playable?) && @actor.playable?)
+    # !(@actor.respond_to?(:displaceable?) && @actor.displaceable?)
   end
 
   def blocks_path?

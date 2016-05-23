@@ -5,8 +5,14 @@ module Battlefield
         true
       end
 
+      def initiative
+        100
+      end
+
       def start_turn
-        clear_path_stack!
+        if enemies_present?
+          clear_path_stack!
+        end
         wait_for_input
       end
 
@@ -59,6 +65,24 @@ module Battlefield
         when :up_right then [@tile.h+1, @tile.v-1]
         when :down_left then [@tile.h-1, @tile.v+1]
         when :down_right then [@tile.h+1, @tile.v+1]
+        end
+      end
+
+      def enemies_present?
+        sighted_actors_in_party.any? do |actor|
+          actor.visible_actors.any? do |visible_actor|
+            visible_actor.has_behavior?(::Battlefield::Behavior::Enemy)
+          end
+        end
+      end
+
+      def sighted_actors_in_party
+        @battlefield.actors.reject do |actor|
+          !(
+            (actor.has_behavior?(::Battlefield::Behavior::Playable) ||
+            actor.has_behavior?(::Battlefield::Behavior::Companion)) &&
+            actor.has_behavior?(::Battlefield::Behavior::Sighted)
+          )
         end
       end
     end

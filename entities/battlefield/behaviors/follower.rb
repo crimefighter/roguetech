@@ -1,6 +1,11 @@
 module Battlefield
   module Behavior
     module Follower
+      def initiative
+        return 0 if follow_target.nil? || tile.nil?
+        100 - (follow_target.tile.h - tile.h).abs - (follow_target.tile.v - tile.v).abs
+      end
+
       def set_follow_target actor
         @follow_target = actor
       end

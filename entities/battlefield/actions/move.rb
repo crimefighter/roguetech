@@ -9,11 +9,7 @@ module Battlefield
       def perform!
         super
 
-        if target_actor && target_actor.respond_to?(:displaceable?) && target_actor.displaceable?
-          target_actor.give_way @actor
-        elsif !target_actor
-          @actor.set_tile get_tile
-        end
+        @actor.set_tile get_tile
 
         Logger.info "#{@actor.to_s} moved to #{@h}, #{@v} for #{action_points_spent} and has #{@actor.action_points}/#{@actor.max_action_points} AP left"
         @actor.reset_visibility_cache! if @actor.respond_to?(:reset_visibility_cache!)

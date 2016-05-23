@@ -2,7 +2,7 @@ module Battlefield
   module Action
     class Base
       def self.action_point_cost_for actor
-        25
+        50
       end
 
       attr_reader :action_points_spent, :h, :v

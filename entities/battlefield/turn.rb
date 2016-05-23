@@ -20,7 +20,7 @@ class Battlefield::Turn
 
   def initialize options
     @battlefield = options[:battlefield]
-    @actor_queue = @battlefield.actors
+    @actor_queue = build_actor_queue @battlefield.actors
 
     raise ArgumentError.new("Invalid arguments for Battlefield::Turn: #{options.inspect}") unless valid?
 
@@ -68,6 +68,12 @@ class Battlefield::Turn
 
   def current_actor
     @actor_queue[@current_actor_index]
+  end
+
+  def build_actor_queue actors
+    actors.sort do |actor1, actor2|
+      actor2.try(:initiative).to_i <=> actor1.try(:initiative).to_i
+    end
   end
 
   private

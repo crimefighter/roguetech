@@ -28,6 +28,9 @@ module Battlefield
           })
         end
       rescue => e
+        new_action = try_displace(h, v)
+        return new_action if new_action
+
         Logger.info "Can't walk there!"
         clear_path_stack!
       end
@@ -40,6 +43,17 @@ module Battlefield
         to = BattlefieldGridLocation.new(target_tile.x, target_tile.y)
 
         @battlefield.pather.guide(from, to)
+      end
+
+      def try_displace h, v
+        target_tile = @battlefield.get_tile(h, v)
+        return if target_tile.nil?
+        target_actor = target_tile.actor
+        if target_actor && target_actor.respond_to?(:displaceable?) && target_actor.displaceable?
+          target_actor.give_way(self)
+        end
+      rescue => e
+        puts "Displace failed"
       end
     end
   end

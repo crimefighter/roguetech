@@ -15,7 +15,6 @@ module Battlefield
           }).perform!
         rescue => e
           Logger.info "Can't be displaced!"
-          clear_path_stack!
         end
     end
   end

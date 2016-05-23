@@ -17,23 +17,25 @@ class GameWindow < Chingu::Window
     })
     @battlefield.add_actor player
 
-    follower = Battlefield::Actor.new({
-      battlefield: @battlefield,
-      tile: @battlefield.tiles.flatten.find {|tile| !tile.blocked? && tile.actor.nil?},
-      behaviors: [
-        Battlefield::Behavior::Companion,
-        Battlefield::Behavior::Movable,
-        Battlefield::Behavior::Attacker,
-        Battlefield::Behavior::Sighted,
-        Battlefield::Behavior::Visible,
-        Battlefield::Behavior::Displaceable
-      ]
-    })
-
-    follower.set_master player
-    @battlefield.add_actor follower
-
     2.times do
+      follower = Battlefield::Actor.new({
+        battlefield: @battlefield,
+        tile: @battlefield.tiles.flatten.find {|tile| !tile.blocked? && tile.actor.nil?},
+        behaviors: [
+          Battlefield::Behavior::Companion,
+          Battlefield::Behavior::Movable,
+          Battlefield::Behavior::Attacker,
+          Battlefield::Behavior::Sighted,
+          Battlefield::Behavior::Visible,
+          Battlefield::Behavior::Displaceable
+        ]
+      })
+
+      follower.set_master player
+      @battlefield.add_actor follower
+    end
+
+    0.times do
       @battlefield.add_actor Battlefield::Actor.new({
         battlefield: @battlefield,
         tile: @battlefield.tiles.flatten.shuffle.find {|tile| !tile.blocked? && tile.actor.nil?},

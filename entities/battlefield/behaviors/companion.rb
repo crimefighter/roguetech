@@ -40,17 +40,20 @@ module Battlefield
         end
 
         def enemies_present?
-          actors_in_party.any? do |actor|
+          sighted_actors_in_party.any? do |actor|
             actor.visible_actors.any? do |visible_actor|
               visible_actor.has_behavior?(::Battlefield::Behavior::Enemy)
             end
           end
         end
 
-        def actors_in_party
+        def sighted_actors_in_party
           @battlefield.actors.reject do |actor|
-            !actor.has_behavior?(::Battlefield::Behavior::Playable) &&
-            !actor.has_behavior?(::Battlefield::Behavior::Companion)
+            !(
+              (actor.has_behavior?(::Battlefield::Behavior::Playable) ||
+              actor.has_behavior?(::Battlefield::Behavior::Companion)) &&
+              actor.has_behavior?(::Battlefield::Behavior::Sighted)
+            )
           end
         end
     end

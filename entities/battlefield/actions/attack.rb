@@ -6,7 +6,7 @@ module Battlefield
       end
 
       def valid?
-        super && !target_actor.nil? && @actor.respond_to?(:attack_range) && @actor.respond_to?(:attack_damage) && target_in_range?
+        super && !target_actor.nil? && @actor.try(:attack_range) && @actor.try(:attack_damage) && target_in_range?
       end
 
       def perform!

@@ -69,6 +69,14 @@ class Battlefield::Actor
     end
   end
 
+  def to_s
+    s = super
+    if respond_to?(:playable?) && playable?
+      s += ' (PLAYER)'
+    end
+    s
+  end
+
   def method_missing symbol, *args
     behavior = behavior_responding_to symbol
     if !behavior.nil?
@@ -81,6 +89,10 @@ class Battlefield::Actor
 
   def respond_to? symbol
     super || !behavior_responding_to(symbol).nil?
+  end
+
+  def try(symbol, *args)
+    send(symbol, *args) rescue nil
   end
 
   def behavior_responding_to symbol
